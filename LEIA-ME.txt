@@ -1,0 +1,152 @@
+═══════════════════════════════════════════════════════════════════
+                    JOGO DA ONÇA - IMPLEMENTAÇÃO IA
+═══════════════════════════════════════════════════════════════════
+
+ARQUIVOS DO PROJETO:
+───────────────────────────────────────────────────────────────────
+onca_py/
+  ├── controlador.py        - Controlador do jogo (gerencia partidas)
+  ├── tabuleiro.py          - Interface de comunicação com Redis
+  ├── jogo.py               - Lógica do jogo e geração de movimentos
+  ├── busca.py              - Algoritmo Minimax com poda Alfa-Beta
+  ├── ia_jogador.py         - Jogador IA (usa jogo.py + busca.py)
+  ├── requirements.txt      - Dependências Python
+  └── Atividade_README.md   - README original da atividade
+
+JOGAR_IA_VS_IA.bat          - Assistir 2 IAs jogando entre si
+JOGAR_IA_VS_PLAYER.bat      - Jogar contra a IA
+docker-compose.yml          - Configuração do servidor Redis
+
+
+COMO JOGAR:
+───────────────────────────────────────────────────────────────────
+
+1) PREPARAÇÃO:
+   - Certifique-se que o Docker está rodando
+   - Inicie o servidor Redis:
+     > docker-compose up -d
+
+2) IA vs IA (Assistir):
+   - Execute: JOGAR_IA_VS_IA.bat
+   - Abrirá 3 janelas: Controlador, IA Onça, IA Cachorros
+   - Observe o jogo acontecer automaticamente
+
+3) Você vs IA:
+   - Execute: JOGAR_IA_VS_PLAYER.bat
+   - Escolha seu lado (1=Onça, 2=Cachorros)
+   - Abrirá 3 janelas: Controlador, IA, Você
+   - Na sua janela, digite os movimentos conforme solicitado
+
+
+FORMATO DOS MOVIMENTOS:
+───────────────────────────────────────────────────────────────────
+
+Movimento Simples (m):
+  Sintaxe: m linha_origem coluna_origem linha_destino coluna_destino
+  Exemplo: m 3 3 4 3
+  (Move peça de (3,3) para (4,3))
+
+Salto/Captura (s) - Apenas Onça:
+  Sintaxe: s num_saltos linha1 col1 linha2 col2 ... linhaN colN
+  Exemplo: s 1 4 3 6 3
+  (Onça em (4,3) salta para (6,3), capturando cachorro em (5,3))
+  
+  Salto Múltiplo:
+  Exemplo: s 2 4 3 6 3 4 5
+  (Onça faz 2 saltos consecutivos)
+
+Passar a vez (n):
+  Sintaxe: n
+  (Usado quando não há movimentos válidos)
+
+
+TABULEIRO:
+───────────────────────────────────────────────────────────────────
+
+Linha 1:  c c c c c    (5 cachorros)
+Linha 2:  c c c c c    (5 cachorros)
+Linha 3:  c c o c c    (4 cachorros + 1 onça)
+Linha 4:  - - - - -    (5 posições vazias)
+Linha 5:  - - - - -    (5 posições vazias)
+Linha 6:    - - -      (3 posições vazias)
+Linha 7:  - - - - -    (posições especiais)
+
+Símbolos:
+  o = Onça
+  c = Cachorro
+  - = Vazio
+
+
+REGRAS DO JOGO:
+───────────────────────────────────────────────────────────────────
+
+ONÇA (1 peça):
+  - Move-se para posições adjacentes vazias
+  - Pode SALTAR sobre cachorros para capturá-los
+  - Pode fazer múltiplos saltos em sequência
+  - VENCE se capturar 5 ou mais cachorros (deixar 9 ou menos)
+
+CACHORROS (14 peças):
+  - Movem-se para posições adjacentes vazias
+  - NÃO podem capturar a onça
+  - VENCEM se cercarem a onça (sem movimentos possíveis)
+
+IMPORTANTE:
+  - Posições ímpares (soma linha+coluna ímpar) só movem ortogonalmente
+  - Posições pares podem mover em todas as 8 direções
+  - Linha 7 tem movimento especial horizontal (4 casas)
+
+
+CONFIGURAÇÃO DA IA:
+───────────────────────────────────────────────────────────────────
+
+Arquivo: ia_jogador.py (linhas 23-24)
+
+profundidade = 5        # Profundidade da busca (4-6 recomendado)
+tempo_limite = 30       # Tempo máximo por jogada (segundos)
+
+Aumentar profundidade = IA mais forte, mas mais lenta
+Diminuir profundidade = IA mais rápida, mas mais fraca
+
+
+ALGORITMO:
+───────────────────────────────────────────────────────────────────
+
+- Minimax com poda Alfa-Beta
+- Profundidade padrão: 5 níveis
+- Heurísticas:
+  * Onça: prioriza capturas e mobilidade
+  * Cachorros: priorizam cercar a onça e controle de espaço
+- Explora ~8.000 a 50.000 nós por jogada
+
+
+DEPENDÊNCIAS:
+───────────────────────────────────────────────────────────────────
+
+Python 3.12+
+redis (biblioteca Python)
+
+Instalar:
+> pip install -r requirements.txt
+
+
+TROUBLESHOOTING:
+───────────────────────────────────────────────────────────────────
+
+Problema: Erro de conexão Redis
+Solução: Verifique se Docker está rodando e execute:
+         > docker-compose up -d
+
+Problema: Jogo não inicia
+Solução: Certifique-se que o controlador iniciou primeiro
+         Aguarde 2-3 segundos entre iniciar os processos
+
+Problema: Movimentos inválidos
+Solução: Verifique o formato do movimento
+         Certifique-se que as posições são válidas (use tabuleiro visual)
+
+
+═══════════════════════════════════════════════════════════════════
+Desenvolvido usando Minimax + Alpha-Beta Pruning
+Antony Henrique Bresolin
+═══════════════════════════════════════════════════════════════════
